@@ -1,3 +1,24 @@
-.project
-LOSI-*.exe
+# Rust
+/target/
+Cargo.lock
+**/*.rs.bk
+*.rlib
+*.rmeta
 
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+*.exe
+*.dll
+
+# Local
+config.toml
+history.json
+.env

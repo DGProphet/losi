@@ -1,0 +1,68 @@
+[package]
+name = "hybrid-shell-win11"
+version = "0.1.0"
+edition = "2021"
+authors = ["DGProphet"]
+description = "A modern hybrid shell for Windows 11 with Unix/Linux interoperability"
+repository = "https://github.com/DGProphet/losi"
+license = "MIT"
+keywords = ["shell", "windows11", "hybrid", "wsl2", "terminal"]
+
+[dependencies]
+# Core CLI & Async
+clap = { version = "4.4", features = ["derive", "cargo"] }
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Configuration & Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Windows-specific
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser", "winreg", "consoleapi", "handleapi", "processthreadsapi"] }
+windows = { version = "0.51", features = ["Win32_System_Com", "Win32_UI_Shell", "Win32_Foundation"] }
+regex = "1.10"
+conpty = "0.6"
+
+# File operations
+walkdir = "2.4"
+dirs = "5.0"
+tempfile = "3.8"
+shellexpand = "3.1"
+
+# Terminal UI
+crossterm = { version = "0.27", features = ["serde"] }
+ratatui = { version = "0.25", optional = true }
+
+# Process management
+nix = { version = "0.27", features = ["process", "signal"] }
+
+# Async utilities
+futures = "0.3"
+parking_lot = "0.12"
+
+# Fuzzy search
+fuzzy-matcher = "0.3"
+
+[features]
+default = ["ui"]
+ui = ["ratatui"]
+wsl2-bridge = []
+
+[[bin]]
+name = "hshell"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

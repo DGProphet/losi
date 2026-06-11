@@ -1,10 +1,8 @@
 use anyhow::Result;
 use tracing::info;
 
-#[cfg(target_os = "windows")]
-use winapi::um::winuser::GetSystemMetrics;
-
 /// Initialize Windows 11 specific features
+#[allow(dead_code)]
 pub async fn init_windows11() -> Result<()> {
     info!("Initializing Windows 11 features");
     
@@ -17,20 +15,19 @@ pub async fn init_windows11() -> Result<()> {
 }
 
 #[cfg(target_os = "windows")]
+#[allow(dead_code)]
 pub fn is_windows11() -> bool {
-    use std::os::raw::c_int;
-    unsafe {
-        let major = GetSystemMetrics(0); // SM_CXSCREEN
-        major > 0 // Simplified check
-    }
+    true // Simplified check - actual implementation would use Windows API
 }
 
 #[cfg(not(target_os = "windows"))]
+#[allow(dead_code)]
 pub fn is_windows11() -> bool {
     false
 }
 
 /// Get Windows Terminal capabilities
+#[allow(dead_code)]
 pub fn has_terminal_support() -> bool {
     #[cfg(target_os = "windows")]
     {

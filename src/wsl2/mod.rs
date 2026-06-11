@@ -69,6 +69,7 @@ pub async fn set_default(distro: &str) -> Result<()> {
 }
 
 /// Execute a command in WSL2
+#[allow(dead_code)]
 pub async fn execute(distro: Option<&str>, command: &str) -> Result<()> {
     let mut cmd = Command::new("wsl");
     

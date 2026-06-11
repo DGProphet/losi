@@ -11,7 +11,7 @@ pub async fn list_themes() -> Result<()> {
     Ok(())
 }
 
-pub async fn apply_theme(config: &Config, name: &str) -> Result<()> {
+pub async fn apply_theme(_config: &Config, name: &str) -> Result<()> {
     match name {
         "default" | "dracula" | "nord" | "solarized" => {
             println!("Theme '{}' will be applied on next shell start", name);

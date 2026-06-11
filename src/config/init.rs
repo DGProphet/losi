@@ -1,7 +1,5 @@
 use crate::config::Config;
 use anyhow::Result;
-use std::path::PathBuf;
-use tracing::info;
 
 pub async fn initialize_config(force: bool) -> Result<()> {
     let config_path = Config::default_path()?;

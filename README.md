@@ -1,29 +1,54 @@
-# Hybrid Shell for Windows 11
+# Modern LiteStep
 
-A modern, feature-rich command shell for Windows 11 with native Unix/Linux interoperability through WSL2 integration.
+**Desktop Customization Engine for Windows 11** - A modern successor to the legendary LiteStep desktop shell.
+
+## Vision
+
+Restore the power of desktop customization to Windows 11. LiteStep was a revolutionary desktop shell that allowed users to completely customize their Windows experience. This project brings that capability to modern Windows using Rust and Windows 11 APIs.
+
+## Modes
+
+### Explorer Integration (Phase 1) ✨
+Non-destructive integration with Windows Explorer:
+- Apply custom themes without replacing shell
+- Desktop widgets and overlays
+- Hotspot detection
+- Safe to use alongside Windows UI
+- Easier to debug and develop
+
+### Shell Replacement (Phase 2) 🔥
+Full shell replacement like original LiteStep:
+- Replace explorer.exe with losi.exe
+- Complete desktop control
+- Custom taskbar, menus, and window decorations
+- Similar to Windows 9x LiteStep experience
 
 ## Features
 
-- **Modern CLI Interface** - Built with Rust for performance and reliability
-- **Windows 11 Integration** - Native Windows 11 features and Windows Terminal support
-- **WSL2 Bridge** - Seamless execution of Linux commands directly from the shell
-- **Customizable Themes** - Multiple built-in themes (default, dracula, nord, solarized)
-- **Command History** - Persistent command history with search
-- **Environment Management** - Easy environment variable management
-- **Async/Await Support** - Non-blocking operations for better responsiveness
-- **Fluent Design** - Modern Windows 11 aesthetics
+### Current
+- ✅ Theme configuration system
+- ✅ .rc file parser (LiteStep format)
+- ✅ Configuration management
+- ✅ Modular architecture
 
-## Getting Started
+### In Development
+- 🔄 Explorer integration
+- 🔄 Theme application
+- 🔄 Desktop rendering
+- 🔄 Widget system
 
-### Prerequisites
+### Planned
+- 📋 Custom window decorations
+- 📋 Taskbar replacement
+- 📋 Global hotkeys
+- 📋 Widget library
+- 📋 Plugin system
+- 📋 Live theme reload
+- 📋 Shell replacement mode
 
-- Windows 11
-- Rust 1.70+ (for development)
-- WSL2 (optional, for Linux command integration)
+## Installation
 
-### Installation
-
-#### From Source
+### From Source
 
 ```bash
 git clone https://github.com/DGProphet/losi.git
@@ -32,180 +57,162 @@ git checkout hybrid-shell-win11
 cargo build --release
 ```
 
-The binary will be available at `target/release/hshell.exe`
+Binary: `target/release/losi.exe`
 
-#### From Releases
+## Usage
 
-(Coming soon)
-
-### Quick Start
+### Initialize Configuration
 
 ```bash
-# Initialize configuration
-hshell init
-
-# Start the interactive shell
-hshell
-
-# Check WSL2 status
-hshell wsl status
-
-# List available themes
-hshell theme list
-
-# Apply a theme
-hshell theme apply dracula
+losi init
 ```
 
-## Commands
+Creates configuration at `%APPDATA%\losi\config.toml`
 
-### Core Commands
+### Create a Theme
+
+Create a `.rc` file with LiteStep format:
+
+```ini
+[Desktop]
+Background=C:\Users\YourName\Pictures\background.png
+Color=0x1F1F1F
+
+[Taskbar]
+Height=48
+Opacity=0.95
+
+[Widgets]
+Clock=enabled
+Weather=enabled
+```
+
+### Apply a Theme
 
 ```bash
-hshell init                          # Initialize default configuration
-hshell config                        # Show current configuration
-hshell config --path                 # Show config file location
+losi theme apply C:\Themes\mytheme.rc
 ```
 
-### Theme Management
+### Start Customization
 
 ```bash
-hshell theme list                    # List available themes
-hshell theme apply <name>            # Apply a theme
-hshell theme current                 # Show currently active theme
+# Explorer integration (default)
+losi start
+
+# Shell replacement mode (future)
+losi start --shell
 ```
 
-### WSL2 Integration
-
-```bash
-hshell wsl status                    # Check WSL2 installation status
-hshell wsl list                      # List installed distributions
-hshell wsl set-default <distro>      # Set default distribution
-```
-
-### Environment Variables
-
-```bash
-hshell env list                      # List all environment variables
-hshell env get <name>                # Get specific variable
-hshell env set <name> <value>        # Set a variable
-```
-
-### Interactive Mode
-
-Once in the shell, use standard Windows commands:
+## Project Structure
 
 ```
-hshell> dir
-hshell> cd C:\
-hshell> python --version
-hshell> wsl ls -la
-hshell> exit
+src/
+├── main.rs              # Entry point & CLI
+├── config/              # Configuration management
+│   ├── mod.rs          # Config structure
+│   ├── init.rs         # Initialization
+│   └── commands.rs     # Config commands
+├── theme/              # Theme engine
+│   ├── mod.rs          # Theme management
+│   └── parser.rs       # .rc parser
+├── desktop/            # Desktop management
+│   ├── mod.rs          # Desktop manager
+│   ├── widgets.rs      # Widget system
+│   └── rendering.rs    # Desktop rendering
+└── explorer/           # Explorer integration
+    ├── mod.rs          # Integration control
+    ├── hooking.rs      # Process hooking
+    └── integration.rs  # Explorer hooks
 ```
 
 ## Configuration
 
-Configuration is stored in TOML format at:
-- **Windows:** `%APPDATA%\hshell\config.toml`
-- **Default:** Creates automatically on first run
-
-### Example Configuration
+Default location: `%APPDATA%\losi\config.toml`
 
 ```toml
-[theme]
-name = "default"
-
-[theme.colors]
-foreground = "#E1E1E1"
-background = "#0C0C0C"
-accent = "#007ACC"
-error = "#F48771"
-success = "#4EC9B0"
-
-[shell]
-prompt = "hshell> "
-editor = "code"
-shell_type = "powershell"
-
-[wsl2]
-enabled = false
-default_distro = "Ubuntu"
-path_mapping = true
-
-[history]
+[desktop]
 enabled = true
-max_entries = 10000
+show_widgets = true
+widget_opacity = 0.9
+animation_speed = 200
+
+[theme]
+current_theme = "default"
+theme_directory = "C:\\Users\\YourName\\AppData\\Roaming\\losi\\themes"
+auto_reload = true
+
+[system]
+integration_mode = "explorer"  # or "shell"
+auto_start = false
+log_level = "info"
 ```
-
-## Architecture
-
-### Project Structure
-
-```
-src/
-├── main.rs           # CLI entry point
-├── config/           # Configuration management
-├── shell/            # Core shell logic
-├── windows/          # Windows 11 integration
-├── wsl2/             # WSL2 bridge
-├── cli/              # CLI utilities
-└── history/          # Command history
-```
-
-### Key Components
-
-- **Shell** - Main interactive shell loop and command execution
-- **Config** - TOML-based configuration with defaults
-- **Windows** - Windows 11 specific features and terminal detection
-- **WSL2** - Bridge for executing Linux commands via WSL2
-- **History** - Persistent command history with JSON storage
 
 ## Development
 
 ### Building
 
 ```bash
-cargo build              # Debug build
-cargo build --release   # Release build with optimizations
-```
-
-### Running Tests
-
-```bash
-cargo test
+cargo build              # Debug
+cargo build --release   # Release (optimized)
 ```
 
 ### Running with Logging
 
 ```bash
-RUST_LOG=debug hshell
-RUST_LOG=trace hshell -vvv
+RUST_LOG=debug losi start
+RUST_LOG=trace losi start
+```
+
+### Testing
+
+```bash
+cargo test
 ```
 
 ## Roadmap
 
-- [ ] Tab completion
-- [ ] Plugin system (WASM-based)
-- [ ] Git integration
-- [ ] Package manager support
-- [ ] Custom keybindings
-- [ ] Split panes / multi-window support
-- [ ] Command aliases
-- [ ] Advanced history search
-- [ ] Windows Terminal integration API
-- [ ] Theming system enhancement
+### Phase 1: Explorer Integration
+- [ ] Process hooking into explorer.exe
+- [ ] Theme rendering system
+- [ ] Desktop widget rendering
+- [ ] Mouse/click detection
+- [ ] Window decoration hooks
 
-## Contributing
+### Phase 2: Full Customization
+- [ ] Custom taskbar implementation
+- [ ] Window frame customization
+- [ ] System menu replacement
+- [ ] Icon themes
+- [ ] Cursor themes
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Phase 3: Shell Replacement
+- [ ] Replace explorer.exe
+- [ ] Desktop management
+- [ ] Window manager
+- [ ] File browser integration
+- [ ] System tray
+
+### Phase 4: Advanced Features
+- [ ] Plugin system (WASM)
+- [ ] Macro system
+- [ ] Scripting support
+- [ ] Community theme hub
+- [ ] Live preview editor
+
+## History
+
+LiteStep was a legendary Windows desktop shell that dominated the customization scene from the 1990s through early 2000s. It allowed complete customization of the desktop through powerful theme files and a robust plugin system. This project aims to bring that experience to modern Windows 11.
 
 ## License
 
 MIT License - See LICENSE file for details
 
+## Contributing
+
+Contributions welcome! This is an ambitious project to resurrect desktop customization.
+
 ## Acknowledgments
 
-- Originally evolved from [LOSI](https://github.com/Tobbe/losi) - LiteStep OpenSource Installer
-- Built with [Rust](https://www.rust-lang.org/)
-- Uses [Tokio](https://tokio.rs/) for async runtime
-- CLI framework by [Clap](https://docs.rs/clap/)
+- **Original LiteStep** - The inspiration and foundation
+- **Rust Community** - Amazing tools and libraries
+- **Windows API** - Making modern customization possible

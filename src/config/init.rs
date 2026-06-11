@@ -20,9 +20,9 @@ pub async fn initialize_config(force: bool) -> Result<()> {
     println!("✓ Configuration initialized at {:?}", config_path);
     println!();
     println!("Next steps:");
-    println!("  1. Edit the config: hshell config --path");
-    println!("  2. List available themes: hshell theme list");
-    println!("  3. Start the shell: hshell");
+    println!("  1. Create themes in: {:?}", config.theme.theme_directory);
+    println!("  2. Load a theme: losi theme apply ./path/to/theme.rc");
+    println!("  3. Start customization: losi start");
 
     Ok(())
 }

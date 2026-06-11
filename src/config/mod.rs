@@ -4,51 +4,35 @@ use std::path::PathBuf;
 use tracing::info;
 
 pub mod init;
-pub mod theme;
 pub mod commands;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
+    pub desktop: DesktopConfig,
     pub theme: ThemeConfig,
-    pub shell: ShellConfig,
-    pub wsl2: Wsl2Config,
-    pub history: HistoryConfig,
+    pub system: SystemConfig,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DesktopConfig {
+    pub enabled: bool,
+    pub show_widgets: bool,
+    pub widget_opacity: f32,
+    pub animation_speed: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThemeConfig {
-    pub name: String,
-    pub colors: ColorScheme,
+    pub current_theme: String,
+    pub theme_directory: PathBuf,
+    pub auto_reload: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ColorScheme {
-    pub foreground: String,
-    pub background: String,
-    pub accent: String,
-    pub error: String,
-    pub success: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ShellConfig {
-    pub prompt: String,
-    pub editor: String,
-    pub shell_type: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Wsl2Config {
-    pub enabled: bool,
-    pub default_distro: Option<String>,
-    pub path_mapping: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HistoryConfig {
-    pub enabled: bool,
-    pub max_entries: usize,
-    pub location: PathBuf,
+pub struct SystemConfig {
+    pub integration_mode: String, // "explorer" or "shell"
+    pub auto_start: bool,
+    pub log_level: String,
 }
 
 impl Config {
@@ -73,7 +57,7 @@ impl Config {
     pub fn default_path() -> Result<PathBuf> {
         let config_dir = dirs::config_dir()
             .ok_or_else(|| anyhow::anyhow!("Could not determine config directory"))?
-            .join("hshell");
+            .join("losi");
         Ok(config_dir.join("config.toml"))
     }
 
@@ -98,65 +82,44 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            desktop: DesktopConfig::default(),
             theme: ThemeConfig::default(),
-            shell: ShellConfig::default(),
-            wsl2: Wsl2Config::default(),
-            history: HistoryConfig::default(),
+            system: SystemConfig::default(),
+        }
+    }
+}
+
+impl Default for DesktopConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            show_widgets: true,
+            widget_opacity: 0.9,
+            animation_speed: 200,
         }
     }
 }
 
 impl Default for ThemeConfig {
     fn default() -> Self {
+        let theme_dir = dirs::config_dir()
+            .map(|d| d.join("losi").join("themes"))
+            .unwrap_or_else(|| PathBuf::from("./themes"));
+
         Self {
-            name: "default".to_string(),
-            colors: ColorScheme::default(),
+            current_theme: "default".to_string(),
+            theme_directory: theme_dir,
+            auto_reload: true,
         }
     }
 }
 
-impl Default for ColorScheme {
+impl Default for SystemConfig {
     fn default() -> Self {
         Self {
-            foreground: "#E1E1E1".to_string(),
-            background: "#0C0C0C".to_string(),
-            accent: "#007ACC".to_string(),
-            error: "#F48771".to_string(),
-            success: "#4EC9B0".to_string(),
-        }
-    }
-}
-
-impl Default for ShellConfig {
-    fn default() -> Self {
-        Self {
-            prompt: "hshell> ".to_string(),
-            editor: "code".to_string(),
-            shell_type: "powershell".to_string(),
-        }
-    }
-}
-
-impl Default for Wsl2Config {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            default_distro: None,
-            path_mapping: true,
-        }
-    }
-}
-
-impl Default for HistoryConfig {
-    fn default() -> Self {
-        let history_path = dirs::data_dir()
-            .map(|d| d.join("hshell").join("history.json"))
-            .unwrap_or_else(|| PathBuf::from("./history.json"));
-
-        Self {
-            enabled: true,
-            max_entries: 10000,
-            location: history_path,
+            integration_mode: "explorer".to_string(),
+            auto_start: false,
+            log_level: "info".to_string(),
         }
     }
 }

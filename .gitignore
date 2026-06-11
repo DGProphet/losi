@@ -17,8 +17,12 @@ Cargo.lock
 Thumbs.db
 *.exe
 *.dll
+*.pdb
 
 # Local
 config.toml
 history.json
 .env
+
+# Logs
+*.log

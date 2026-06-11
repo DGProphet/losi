@@ -3,28 +3,21 @@ use std::error::Error;
 use tracing_subscriber;
 
 mod config;
-mod shell;
-mod windows;
-mod wsl2;
-mod cli;
-mod history;
+mod theme;
+mod desktop;
+mod explorer;
 
 use config::Config;
-use shell::Shell;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-#[command(name = "hshell")]
-#[command(about = "Hybrid Shell for Windows 11 - Modern CLI with Unix/Windows interoperability", long_about = None)]
+#[command(name = "losi")]
+#[command(about = "Modern LiteStep - Desktop Customization Engine for Windows 11", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
-    /// Start interactive shell mode (default if no command)
-    #[arg(short, long, global = true)]
-    interactive: bool,
-
-    /// Configuration file path
+    /// Configuration file or theme directory path
     #[arg(short, long, global = true)]
     config: Option<String>,
 
@@ -35,7 +28,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Initialize configuration
+    /// Initialize default configuration and themes
     Init {
         /// Force overwrite existing config
         #[arg(short, long)]
@@ -52,46 +45,26 @@ enum Commands {
         #[command(subcommand)]
         action: Option<ThemeCommand>,
     },
-    /// WSL2 integration commands
-    Wsl {
-        #[command(subcommand)]
-        action: Option<WslCommand>,
+    /// Start desktop customization (explorer integration or shell replacement)
+    Start {
+        /// Use shell replacement instead of explorer integration
+        #[arg(long)]
+        shell: bool,
     },
-    /// Shell environment commands
-    Env {
-        #[command(subcommand)]
-        action: Option<EnvCommand>,
-    },
+    /// Stop desktop customization
+    Stop,
 }
 
 #[derive(Subcommand)]
 enum ThemeCommand {
     /// List available themes
     List,
-    /// Apply a theme
-    Apply { name: String },
+    /// Apply a theme (.rc file)
+    Apply { theme_path: String },
     /// Show current theme
     Current,
-}
-
-#[derive(Subcommand)]
-enum WslCommand {
-    /// Check WSL2 status
-    Status,
-    /// List available distributions
-    List,
-    /// Set default distribution
-    SetDefault { distro: String },
-}
-
-#[derive(Subcommand)]
-enum EnvCommand {
-    /// Show all environment variables
-    List,
-    /// Get a specific variable
-    Get { name: String },
-    /// Set a variable
-    Set { name: String, value: String },
+    /// Reload theme from file
+    Reload,
 }
 
 #[tokio::main]
@@ -122,36 +95,48 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         Some(Commands::Theme { action }) => {
             match action {
-                Some(ThemeCommand::List) => config::theme::list_themes().await?,
-                Some(ThemeCommand::Apply { name }) => {
-                    config::theme::apply_theme(&config, &name).await?
+                Some(ThemeCommand::List) => theme::list_themes().await?,
+                Some(ThemeCommand::Apply { theme_path }) => {
+                    theme::apply_theme(&config, &theme_path).await?
                 }
-                Some(ThemeCommand::Current) => config::theme::show_current(&config).await?,
-                None => println!("Use 'theme list', 'theme apply <name>', or 'theme current'"),
+                Some(ThemeCommand::Current) => theme::show_current(&config).await?,
+                Some(ThemeCommand::Reload) => theme::reload_theme(&config).await?,
+                None => println!("Use 'theme list', 'theme apply <path>', 'theme current', or 'theme reload'"),
             }
         }
-        Some(Commands::Wsl { action }) => {
-            match action {
-                Some(WslCommand::Status) => wsl2::check_status().await?,
-                Some(WslCommand::List) => wsl2::list_distros().await?,
-                Some(WslCommand::SetDefault { distro }) => {
-                    wsl2::set_default(&distro).await?
-                }
-                None => println!("Use 'wsl status', 'wsl list', or 'wsl set-default <distro>"),
+        Some(Commands::Start { shell }) => {
+            if shell {
+                println!("Starting LiteStep as shell replacement...");
+                // TODO: Shell replacement mode
+            } else {
+                println!("Starting LiteStep with explorer integration...");
+                explorer::start_integration(&config).await?
             }
         }
-        Some(Commands::Env { action }) => {
-            match action {
-                Some(EnvCommand::List) => cli::env::list_vars(),
-                Some(EnvCommand::Get { name }) => cli::env::get_var(&name)?,
-                Some(EnvCommand::Set { name, value }) => cli::env::set_var(&name, &value)?,
-                None => println!("Use 'env list', 'env get <name>', or 'env set <name> <value>"),
-            }
+        Some(Commands::Stop) => {
+            println!("Stopping LiteStep...");
+            // TODO: Cleanup and restore
         }
         None => {
-            // Start interactive shell
-            let mut shell = Shell::new(config).await?;
-            shell.run_interactive().await?
+            println!("\n╔═══════════════════════════════════════════════════════╗");
+            println!("║     Modern LiteStep - Desktop Customization Engine    ║");
+            println!("║               Windows 11 Customization                ║");
+            println!("╚═══════════════════════════════════════════════════════╝\n");
+            println!("Usage: losi [COMMAND] [OPTIONS]");
+            println!("\nCommands:");
+            println!("  init           Initialize configuration");
+            println!("  config         Show configuration");
+            println!("  theme          Manage themes");
+            println!("  start          Start desktop customization");
+            println!("  stop           Stop customization");
+            println!("\nOptions:");
+            println!("  -c, --config <PATH>   Configuration path");
+            println!("  -v, --verbose         Increase verbosity");
+            println!("\nExamples:");
+            println!("  losi init                              # Initialize config");
+            println!("  losi theme list                        # List available themes");
+            println!("  losi theme apply ./themes/mytheme.rc   # Apply a theme");
+            println!("  losi start                             # Start customization");
         }
     }
 

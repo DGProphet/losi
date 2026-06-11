@@ -5,6 +5,7 @@ use std::collections::HashMap;
 /// Simple INI-like format:
 /// [Section]
 /// Key=Value
+/// Lines starting with ; are comments
 pub fn parse_rc(content: &str) -> Result<HashMap<String, String>> {
     let mut properties = HashMap::new();
     let mut current_section = String::new();
@@ -12,12 +13,12 @@ pub fn parse_rc(content: &str) -> Result<HashMap<String, String>> {
     for line in content.lines() {
         let line = line.trim();
         
-        // Skip comments
+        // Skip comments and empty lines
         if line.starts_with(';') || line.is_empty() {
             continue;
         }
 
-        // Section header
+        // Section header [Section]
         if line.starts_with('[') && line.ends_with(']') {
             current_section = line[1..line.len()-1].to_string();
             continue;
@@ -42,7 +43,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_rc() {
+    fn test_parse_rc_basic() {
         let content = r#"
         [Desktop]
         Background=C:\Images\bg.png
@@ -56,5 +57,19 @@ mod tests {
         assert_eq!(result.get("Desktop.Background"), Some(&"C:\\Images\\bg.png".to_string()));
         assert_eq!(result.get("Desktop.Color"), Some(&"0xFF00FF".to_string()));
         assert_eq!(result.get("Taskbar.Height"), Some(&"48".to_string()));
+    }
+
+    #[test]
+    fn test_parse_rc_comments() {
+        let content = r#"
+        ; This is a comment
+        [Desktop]
+        ; Another comment
+        Background=image.png
+        "#;
+        
+        let result = parse_rc(content).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result.get("Desktop.Background"), Some(&"image.png".to_string()));
     }
 }
